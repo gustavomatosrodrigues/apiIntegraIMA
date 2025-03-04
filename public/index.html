@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Consulta MTR</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #27ae60;
+            --warning-color: #e67e22;
+            --danger-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #34495e;
+            --gray-color: #95a5a6;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--dark-color);
+            background-color: #f5f7fa;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            border-bottom: 4px solid var(--secondary-color);
+        }
+        
+        h1 {
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .subtitle {
+            color: var(--light-color);
+            font-size: 1rem;
+            font-weight: 300;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+        
+        .card-header {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 1rem;
+            font-weight: 500;
+            font-size: 1.2rem;
+        }
+        
+        .card-body {
+            padding: 1.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--dark-color);
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        
+        input[type="text"]:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.25);
+            outline: none;
+        }
+        
+        .input-error {
+            border-color: var(--danger-color) !important;
+        }
+        
+        .error-text {
+            color: var(--danger-color);
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 1.5rem;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        
+        .btn i {
+            margin-right: 8px;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #1a252f;
+        }
+        
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #2980b9;
+        }
+        
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: #219955;
+        }
+        
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+        
+        .status-bar {
+            display: flex;
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 4px;
+            background-color: var(--light-color);
+            align-items: center;
+        }
+        
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        
+        .status-online {
+            background-color: var(--success-color);
+        }
+        
+        .status-offline {
+            background-color: var(--danger-color);
+        }
+        
+        .status-text {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .cache-controls {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+        }
+        
+        .cache-info {
+            margin-right: 10px;
+            font-size: 0.9rem;
+        }
+        
+        .btn-sm {
+            padding: 0.4rem 0.75rem;
+            font-size: 0.875rem;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 1rem;
+            margin-top: 2rem;
+            color: var(--gray-color);
+            font-size: 0.9rem;
+        }
+        
+        /* Toast notifications */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .toast {
+            background-color: white;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            margin-bottom: 10px;
+            overflow: hidden;
+            animation: slide-in 0.3s ease-out;
+            display: flex;
+            align-items: center;
+            min-width: 300px;
+        }
+        
+        .toast-icon {
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        
+        .toast-success .toast-icon {
+            background-color: var(--success-color);
+        }
+        
+        .toast-error .toast-icon {
+            background-color: var(--danger-color);
+        }
+        
+        .toast-warning .toast-icon {
+            background-color: var(--warning-color);
+        }
+        
+        .toast-info .toast-icon {
+            background-color: var(--secondary-color);
+        }
+        
+        .toast-content {
+            padding: 1rem;
+            flex: 1;
+        }
+        
+        .toast-title {
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+        
+        .toast-message {
+            font-size: 0.875rem;
+            color: var(--gray-color);
+        }
+        
+        .toast-close {
+            padding: 0.5rem 1rem;
+            color: var(--gray-color);
+            cursor: pointer;
+        }
+        
+        .toast-close:hover {
+            color: var(--dark-color);
+        }
+        
+        .loader {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            z-index: 999;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        
+        .loader.active {
+            display: flex;
+        }
+        
+        .loader-spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--secondary-color);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+        
+        .loader-text {
+            font-size: 1.2rem;
+            color: var(--dark-color);
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes slide-in {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .btn-group {
+                flex-direction: column;
+            }
+            
+            .status-bar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .cache-controls {
+                margin-left: 0;
+                margin-top: 1rem;
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+        
+        /* Modo escuro */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #1a1a1a;
+                color: #f5f5f5;
+            }
+            
+            .card {
+                background-color: #2a2a2a;
+            }
+            
+            input[type="text"] {
+                background-color: #333;
+                border-color: #444;
+                color: #f5f5f5;
+            }
+            
+            .status-bar {
+                background-color: #333;
+            }
+            
+            .toast {
+                background-color: #2a2a2a;
+            }
+            
+            .toast-message {
+                color: #bbb;
+            }
+            
+            .loader {
+                background-color: rgba(0, 0, 0, 0.8);
+            }
+            
+            .loader-text {
+                color: #f5f5f5;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Sistema de Consulta MTR</h1>
+        <p class="subtitle">Consulta e download de manifestos de transporte de resíduos</p>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-search"></i> Consulta de Manifesto
+            </div>
+            <div class="card-body">
+                <form id="mtrForm">
+                    <div class="form-group">
+                        <label for="numeroManifesto">Número do Manifesto:</label>
+                        <input type="text" id="numeroManifesto" required>
+                        <div class="error-text">Campo obrigatório</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="cnpj">Usuario:</label>
+                        <input type="text" id="cnpj" required>
+                        <div class="error-text">Campo obrigatório</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="codigo">Senha:</label>
+                        <input type="text" id="codigo"required>
+                        <div class="error-text">Campo obrigatório</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="cnpjConsultante">CNPJ Consultante:</label>
+                        <input type="text" id="cnpjConsultante" required>
+                        <div class="error-text">Campo obrigatório</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="numeroConsulta">Unidade:</label>
+                        <input type="text" id="numeroConsulta"
+						required>
+                        <div class="error-text">Campo obrigatório</div>
+                    </div>
+                    
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-primary" id="btnDownload">
+                            <i class="fas fa-download"></i> Baixar PDF
+                        </button>
+                        <button type="button" class="btn btn-secondary" id="btnVisualize">
+                            <i class="fas fa-eye"></i> Visualizar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-info-circle"></i> Informações do Sistema
+            </div>
+            <div class="card-body">
+                <div class="status-bar">
+                    <div class="status-indicator status-online" id="statusIndicator"></div>
+                    <div class="status-text" id="statusText">API Online</div>
+                    
+                    <div class="cache-controls">
+                        <div class="cache-info" id="cacheInfo">Cache: 0 item(s)</div>
+                        <button class="btn btn-danger btn-sm" id="btnClearCache">
+                            <i class="fas fa-trash"></i> Limpar Cache
+                        </button>
+                    </div>
+                </div>              
+                
+            </div>
+        </div>
+    </div>
+    
+    <div class="toast-container" id="toastContainer"></div>
+    
+    <div class="loader" id="loader">
+        <div class="loader-spinner"></div>
+        <div class="loader-text">Carregando manifesto...</div>
+    </div>
+    
+    <form id="visualizeForm" method="POST" action="/api/visualizar-manifesto" target="_blank" style="display: none;">
+        <input type="hidden" name="numeroManifesto" id="visualizeNumeroManifesto">
+        <input type="hidden" name="cnpj" id="visualizeCnpj">
+        <input type="hidden" name="codigo" id="visualizeCodigo">
+        <input type="hidden" name="cnpjConsultante" id="visualizeCnpjConsultante">
+        <input type="hidden" name="numeroConsulta" id="visualizeNumeroConsulta">
+    </form>
+    
+    <footer>
+        <p>© 2025 Sistema de Consulta MTR - Todos os direitos reservados</p>
+    </footer>
+    
+    <script>
+        // Elementos do DOM
+        const mtrForm = document.getElementById('mtrForm');
+        const btnDownload = document.getElementById('btnDownload');
+        const btnVisualize = document.getElementById('btnVisualize');
+        const btnClearCache = document.getElementById('btnClearCache');
+        const btnFillExample = document.getElementById('btnFillExample');
+        const statusIndicator = document.getElementById('statusIndicator');
+        const statusText = document.getElementById('statusText');
+        const cacheInfo = document.getElementById('cacheInfo');
+        const loader = document.getElementById('loader');
+        const visualizeForm = document.getElementById('visualizeForm');
+        
+        // Campos do formulário de visualização
+        const visualizeNumeroManifesto = document.getElementById('visualizeNumeroManifesto');
+        const visualizeCnpj = document.getElementById('visualizeCnpj');
+        const visualizeCodigo = document.getElementById('visualizeCodigo');
+        const visualizeCnpjConsultante = document.getElementById('visualizeCnpjConsultante');
+        const visualizeNumeroConsulta = document.getElementById('visualizeNumeroConsulta');
+        
+        // Verificar o status da API ao carregar a página
+        document.addEventListener('DOMContentLoaded', function() {
+            checkApiStatus();
+        });
+        
+        // Função para verificar o status da API
+        async function checkApiStatus() {
+            try {
+                const response = await fetch('/api/status');
+                if (!response.ok) {
+                    throw new Error(`Status: ${response.status} ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.status === 'online') {
+                    statusIndicator.className = 'status-indicator status-online';
+                    statusText.textContent = 'API Online';
+                    cacheInfo.textContent = `Cache: ${data.cacheSize} item(s)`;
+                } else {
+                    statusIndicator.className = 'status-indicator status-offline';
+                    statusText.textContent = 'API Offline';
+                }
+            } catch (error) {
+                console.error('Erro ao verificar status da API:', error);
+                statusIndicator.className = 'status-indicator status-offline';
+                statusText.textContent = 'API Offline';
+                showToast('Erro', 'Não foi possível conectar à API: ' + error.message, 'error');
+            }
+        }
+        
+        // Preencher formulário com exemplo
+        btnFillExample.addEventListener('click', function() {
+            document.getElementById('numeroManifesto').value = '2502062257';
+            document.getElementById('cnpj').value = '10459491000197';
+            document.getElementById('codigo').value = '';
+            document.getElementById('cnpjConsultante').value = '10459491000197';
+            document.getElementById('numeroConsulta').value = '29298';
+            
+            showToast('Pronto', 'Formulário preenchido com valores de exemplo', 'info');
+        });
+        
+        // Baixar PDF
+        btnDownload.addEventListener('click', async function() {
+            console.log('Botão de download clicado');
+            if (validateForm()) {
+                const data = getFormData();
+                console.log('Dados do formulário:', data);
+                await downloadPdf(data);
+            }
+        });
+        
+        // Visualizar PDF usando formulário oculto para POST
+        btnVisualize.addEventListener('click', function() {
+            console.log('Botão de visualização clicado');
+            if (validateForm()) {
+                const data = getFormData();
+                console.log('Dados para visualização:', data);
+                
+                // Preencher o formulário oculto
+                visualizeNumeroManifesto.value = data.numeroManifesto;
+                visualizeCnpj.value = data.cnpj;
+                visualizeCodigo.value = data.codigo;
+                visualizeCnpjConsultante.value = data.cnpjConsultante;
+                visualizeNumeroConsulta.value = data.numeroConsulta;
+                
+                // Enviar o formulário
+                visualizeForm.submit();
+            }
+        });
+        
+        // Limpar cache
+        btnClearCache.addEventListener('click', async function() {
+            await clearCache();
+        });
+        
+        // Validar formulário
+        function validateForm() {
+            let valid = true;
+            const fields = ['numeroManifesto', 'cnpj', 'codigo', 'cnpjConsultante', 'numeroConsulta'];
+            
+            fields.forEach(field => {
+                const element = document.getElementById(field);
+                const errorText = element.nextElementSibling;
+                
+                if (!element.value.trim()) {
+                    element.classList.add('input-error');
+                    errorText.style.display = 'block';
+                    valid = false;
+                } else {
+                    element.classList.remove('input-error');
+                    errorText.style.display = 'none';
+                }
+            });
+            
+            if (!valid) {
+                showToast('Aviso', 'Preencha todos os campos obrigatórios', 'warning');
+            }
+            
+            return valid;
+        }
+        
+        // Obter dados do formulário
+        function getFormData() {
+            return {
+                numeroManifesto: document.getElementById('numeroManifesto').value.trim(),
+                cnpj: document.getElementById('cnpj').value.trim(),
+                codigo: document.getElementById('codigo').value.trim(),
+                cnpjConsultante: document.getElementById('cnpjConsultante').value.trim(),
+                numeroConsulta: document.getElementById('numeroConsulta').value.trim()
+            };
+        }
+        
+        // Baixar PDF
+        async function downloadPdf(data) {
+            showLoader(true);
+            
+            try {
+                console.log('Enviando requisição POST para /api/buscar-manifesto:', data);
+                
+                const response = await fetch('/api/buscar-manifesto', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                console.log('Status da resposta:', response.status);
+                
+                if (!response.ok) {
+                    let errorMsg = 'Erro ao buscar o manifesto';
+                    try {
+                        const errorData = await response.json();
+                        console.error('Erro detalhado:', errorData);
+                        errorMsg = errorData.message || errorMsg;
+                    } catch (e) {
+                        console.error('Não foi possível ler o corpo da resposta de erro:', e);
+                    }
+                    throw new Error(errorMsg);
+                }
+                
+                // Verificar se a resposta é um PDF
+                const contentType = response.headers.get('content-type');
+                console.log('Tipo de conteúdo da resposta:', contentType);
+                
+                if (contentType && contentType.includes('application/pdf')) {
+                    // Obter informação do cache
+                    const cacheStatus = response.headers.get('X-Cache') || 'MISS';
+                    console.log('Status do cache:', cacheStatus);
+                    
+                    // Converter a resposta para blob
+                    const blob = await response.blob();
+                    console.log('Tamanho do blob:', blob.size, 'bytes');
+                    
+                    if (blob.size === 0) {
+                        throw new Error('O PDF retornado está vazio');
+                    }
+                    
+                    // Criar URL para o blob
+                    const url = window.URL.createObjectURL(blob);
+                    
+                    // Criar link para download
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = `manifesto-${data.numeroManifesto}.pdf`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    
+                    // Liberar a URL após um breve atraso para garantir que o download comece
+                    setTimeout(() => {
+                        window.URL.revokeObjectURL(url);
+                    }, 100);
+                    
+                    showToast('Sucesso', `PDF baixado com sucesso (${cacheStatus === 'HIT' ? 'do cache' : 'da origem'})`, 'success');
+                    
+                    // Atualizar informações do status
+                    checkApiStatus();
+                } else {
+                    // Se não for PDF, exibir a resposta
+                    try {
+                        const responseText = await response.text();
+                        console.log('Resposta não-PDF:', responseText);
+                        try {
+                            const responseData = JSON.parse(responseText);
+                            showToast('Aviso', `A resposta não é um PDF: ${responseData.message || 'Formato inesperado'}`, 'warning');
+                        } catch (e) {
+                            showToast('Aviso', 'A resposta não é um PDF nem JSON válido', 'warning');
+                        }
+                    } catch (e) {
+                        console.error('Erro ao ler resposta:', e);
+                        showToast('Aviso', 'Não foi possível ler a resposta do servidor', 'warning');
+                    }
+                }
+            } catch (error) {
+                console.error('Erro completo:', error);
+                showToast('Erro', `Falha ao baixar: ${error.message}`, 'error');
+            } finally {
+                showLoader(false);
+            }
+        }
+        
+        // Limpar cache
+        async function clearCache() {
+            showLoader(true);
+            
+            try {
+                console.log('Enviando requisição para limpar cache');
+                const response = await fetch('/api/limpar-cache', {
+                    method: 'POST'
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Erro ao limpar cache: ${response.status} ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                console.log('Resposta da limpeza de cache:', data);
+                
+                showToast('Sucesso', `Cache limpo: ${data.itemsRemovidos} item(s) removido(s)`, 'success');
+                
+                // Atualizar informações do status
+                checkApiStatus();
+            } catch (error) {
+                console.error('Erro ao limpar cache:', error);
+                showToast('Erro', `Falha ao limpar o cache: ${error.message}`, 'error');
+            } finally {
+                showLoader(false);
+            }
+        }
+        
+        // Exibir/ocultar loader
+        function showLoader(show) {
+            loader.className = show ? 'loader active' : 'loader';
+        }
+        
+        // Exibir toast de notificação
+        function showToast(title, message, type = 'info') {
+            const toastContainer = document.getElementById('toastContainer');
+            
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            
+            let icon = 'info-circle';
+            if (type === 'success') icon = 'check-circle';
+            if (type === 'error') icon = 'exclamation-circle';
+            if (type === 'warning') icon = 'exclamation-triangle';
+            
+            toast.innerHTML = `
+                <div class="toast-icon">
+                    <i class="fas fa-${icon}"></i>
+                </div>
+                <div class="toast-content">
+                    <div class="toast-title">${title}</div>
+                    <div class="toast-message">${message}</div>
+                </div>
+                <div class="toast-close">
+                    <i class="fas fa-times"></i>
+                </div>
+            `;
+            
+            // Adicionar ao container
+            toastContainer.appendChild(toast);
+            
+            // Adicionar event listener para fechar
+            toast.querySelector('.toast-close').addEventListener('click', function() {
+                toast.remove();
+            });
+            
+            // Remover automaticamente após 5 segundos
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.remove();
+                }
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
