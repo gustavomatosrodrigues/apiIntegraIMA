@@ -41,6 +41,16 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
+// Middleware para redirecionar para a versão com barra final
+app.use((req, res, next) => {
+  if (req.path === '/' || req.path.endsWith('/')) {
+    return next();
+  }
+
+  // Redireciona para a rota com barra final
+  res.redirect(301, req.originalUrl + '/');
+});
+
 // Rota de status da API
 app.get('/', (req, res) => {
   res.json({ 
